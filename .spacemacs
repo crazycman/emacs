@@ -23,7 +23,7 @@ values."
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     ;; auto-completion
+     auto-completion
      (auto-completion
       (haskell :variables haskell-completion-backend 'intero))
      ;; better-defaults
@@ -50,13 +50,27 @@ values."
               haskell-process-type 'stack-ghci
               haskell-process-args-stack-ghci '("--ghc-options=-ferror-spans" "--with-ghc=intero")
               haskell-stylish-on-save t
-     )
+              )
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(org-journal ox-twbs auctex helm-bibtex pandoc-mode intero ensime)
+   dotspacemacs-additional-packages
+   '(org-journal
+     ox-twbs
+     auctex
+     helm-bibtex
+     pandoc-mode
+     ensime
+     org-jira
+     ein
+     ztree
+     dockerfile-mode
+     lsp-mode
+     ;; intero
+     ;; (lsp-haskell :location (recipe :fetcher github :repo "emacs-lsp/lsp-haskell"))
+    )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -264,11 +278,22 @@ layers configuration. You are free to put any user code."
   ;;       search-engine-alist)
 
   (add-hook 'haskell-mode-hook 'intero-mode)
+  ;; (require 'lsp-haskell)
+  ;; (add-hook 'haskell-mode-hook #'lsp-haskell-enable)
   (add-to-list 'exec-path "~/.local/bin/")
   ;; helm-bibtex
   (setq bibtex-completion-bibliography
         '("/home/conrad/workspace/gpl-content/scalacus/doc/lib.bib"))
   (setq bibtex-completion-library-path '("/home/conrad/Desktop/articles"))
+  ;; org-jira
+  (setq jiralib-url "https://jira.abacusdavinci.com")
+
+  (require 'lsp-mode)
+  (add-to-list 'lsp-language-id-configuration '(sqlx-mode . "sqlx"))
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection '("abacus.sh" "language-server"))
+                    :major-modes '(fundamental-mode)
+                    :server-id 'sqlx-language-server))
  )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -336,6 +361,8 @@ layers configuration. You are free to put any user code."
  '(custom-safe-themes
    (quote
     ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "b7b2cd8c45e18e28a14145573e84320795f5385895132a646ff779a141bbda7e" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
+ '(ein:completion-backend (quote ein:use-company-backend))
+ '(ein:polymode t)
  '(fill-column 100)
  '(ispell-program-name "/usr/bin/aspell")
  '(org-agenda-files
@@ -348,7 +375,8 @@ layers configuration. You are free to put any user code."
      (latex . t)
      (dot . t)
      (ditaa . t)
-     (emacs-lisp . t))))
+     (emacs-lisp . t)
+     (shell . t))))
  '(org-capture-templates
    (quote
     (("a" "Manage" entry
@@ -402,13 +430,14 @@ layers configuration. You are free to put any user code."
      (org-agenda-files :maxlevel . 4))))
  '(package-selected-packages
    (quote
-    (projectile ensime sbt-mode scala-mode web-completion-data dash-functional tern auto-complete git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ with-editor dash git-gutter diff-hl yaml-mode ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit sql-indent spaceline smeargle slim-mode scss-mode sass-mode restart-emacs rainbow-delimiters pug-mode popwin persp-mode pcre2el paradox pandoc-mode orgit org-projectile org-present org-pomodoro org-journal org-download org-bullets open-junk-file neotree move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode linum-relative link-hint less-css-mode latex-preview-pane json-mode js2-refactor js-doc intero info+ indent-guide hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-bibtex helm-ag haskell-snippets graphviz-dot-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu engine-mode emmet-mode elisp-slime-nav dumb-jump define-word csv-mode company-web company-tern company-statistics company-ghci company-ghc company-cabal company-auctex column-enforce-mode coffee-mode cmm-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (lv ht dockerfile-mode ztree px polymode deferred websocket org-jira ox-twbs lsp-ui lsp-haskell lsp-mode powerline org-category-capture alert log4e gntp org-plus-contrib markdown-mode skewer-mode simple-httpd json-snatcher json-reformat multiple-cursors js2-mode hydra parent-mode request biblio parsebib biblio-core haml-mode gitignore-mode pos-tip flx magit magit-popup git-commit ghub smartparens iedit anzu evil goto-chg highlight diminish ghc bind-map bind-key yasnippet packed auctex helm avy helm-core async popup f s haskell-mode company flycheck pkg-info epl org-mime ein projectile ensime sbt-mode scala-mode web-completion-data dash-functional tern auto-complete git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ with-editor dash git-gutter diff-hl yaml-mode ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit sql-indent spaceline smeargle slim-mode scss-mode sass-mode restart-emacs rainbow-delimiters pug-mode popwin persp-mode pcre2el paradox pandoc-mode orgit org-projectile org-present org-pomodoro org-journal org-download org-bullets open-junk-file neotree move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode linum-relative link-hint less-css-mode latex-preview-pane json-mode js2-refactor js-doc intero info+ indent-guide hungry-delete htmlize hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-bibtex helm-ag haskell-snippets graphviz-dot-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu engine-mode emmet-mode elisp-slime-nav dumb-jump define-word csv-mode company-web company-tern company-statistics company-ghci company-ghc company-cabal company-auctex column-enforce-mode coffee-mode cmm-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(paradox-automatically-star t)
- ; '(paradox-github-token "some-token")
+ '(paradox-github-token "3e65d4bb5ca6a7643f6d5eccf4ff30d586d57345")
  '(reftex-label-alist
    (quote
     (("theorem" 116 "the:" nil nil nil)
-     ("definition" 100 "def:" nil nil nil)))))
+     ("definition" 100 "def:" nil nil nil))))
+ '(safe-local-variable-values (quote ((dockerfile-image-name . "sqlx-build")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
